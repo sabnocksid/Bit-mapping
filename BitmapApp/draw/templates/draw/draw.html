@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Draw the Letter</title>
+    <style>
+        canvas { border: 1px solid black; }
+        #feedback { margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Draw the letter: {{ target_letter }}</h2>
+    <canvas id="drawingCanvas" width="200" height="200"></canvas>
+    <button onclick="clearCanvas()">Clear</button>
+    <button onclick="submitDrawing()">Submit</button>
+    <p id="feedback"></p>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        // Enable drawing on the canvas
+        canvas.addEventListener('mousedown', () => drawing = true);
+        canvas.addEventListener('mouseup', () => drawing = false);
+        canvas.addEventListener('mousemove', draw);
+
+        function draw(event) {
+            if (!drawing) return;
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(event.offsetX, event.offsetY, 3, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        async function submitDrawing() {
+            const targetLetter = "{{ target_letter }}";
+
+            // Convert canvas drawing to base64 image
+            const dataUrl = canvas.toDataURL('image/png');
+            const response = await fetch('/process-drawing/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    image: dataUrl,
+                    target_letter: targetLetter
+                })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                document.getElementById('feedback').textContent = `You are ${result.accuracy.toFixed(2)}% accurate. Keep up!`;
+            } else {
+                document.getElementById('feedback').textContent = result.error || 'Error processing the image.';
+            }
+        }
+    </script>
+</body>
+</html>

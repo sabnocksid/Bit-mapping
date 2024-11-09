@@ -1,0 +1,25 @@
+# Django stuff:
+*.log
+*.pot
+*.pyc
+__pycache__
+
+# Ignore migrations folder (optional)
+*/migrations/*
+
+# Ignore local settings
+*.env
+
+# Virtual environment
+venv/
+env/
+
+# Ignore media/uploads directory if you don't want to track uploaded files
+/media/
+
+# Ignore static files if they are generated automatically
+/static/
+
+# Ignore IDE/editor-specific files
+.vscode/
+.idea/
